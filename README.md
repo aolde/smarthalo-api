@@ -15,3 +15,10 @@ To generate the API documentation, run `yarn generate-docs`. If you want to star
 ## Want to help?
 
 There are many more endpoints to document, please have a look in the `api-definition/endpoints/todo` folder for the missing parts.
+
+## Instructions
+
+- APKLab, to decompile and compile the app https://marketplace.visualstudio.com/items?itemName=Surendrajat.apklab
+- SmartHalo version 1.17.0 (because it's in .APK format): https://apkpure.com/smarthalo/bike.smarthalo.app/download/618-APK-9ea0b2dfc1ce5753fd4eb39f8414872a?from=versions%2Fversion
+- Decompile app to Java files and inspect folder `java_src/bike/smarthalo/app/api`.
+- Document the information to `api-definition` and re-generate the docs.
