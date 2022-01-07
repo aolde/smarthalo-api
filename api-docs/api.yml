@@ -1,0 +1,826 @@
+openapi: 3.0.2
+info:
+  title: SmartHalo API
+  version: 0.0.0
+paths:
+  /auth/local/login:
+    post:
+      tags:
+        - Auth
+      operationId: Login
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+        required: true
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /auth/local/refresh_tokens:
+    post:
+      tags:
+        - Auth
+      operationId: RefreshToken
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_jwt:
+                  type: string
+              required:
+                - refresh_jwt
+        required: true
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_jwt:
+                    type: string
+                  refresh_jwt:
+                    type: string
+                required:
+                  - access_jwt
+                  - refresh_jwt
+  /auth/local/signup:
+    post:
+      tags:
+        - Auth
+      operationId: Signup
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+        required: true
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /auth/local/checkEmail:
+    post:
+      tags:
+        - Auth
+      operationId: CheckEmail
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+        required: true
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                type: string
+  /auth/forgot:
+    post:
+      tags:
+        - Auth
+      operationId: ForgotPassword
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+        required: true
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                type: string
+  /api/v1/users/rides:
+    get:
+      tags:
+        - Rides
+      description: Get user rides
+      operationId: GetUserRides
+      parameters:
+        - name: x-access-token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PastRide'
+  /api/v1/users/rides/sync:
+    post:
+      tags:
+        - Rides
+      description: Upload user rides
+      operationId: UploadUserRides
+      parameters:
+        - name: x-access-token
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/RideUploadPayload'
+        required: true
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RideMarker'
+  /api/v2/rides/{ride_id}:
+    delete:
+      tags:
+        - Rides
+      description: Delete ride by ID
+      operationId: DeleteRide
+      parameters:
+        - name: ride_id
+          in: path
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: x-access-token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                type: boolean
+  /v2/users/me/rides/{ride_id}:
+    get:
+      tags:
+        - Rides
+      description: Get ride by ID
+      operationId: GetRide
+      parameters:
+        - name: ride_id
+          in: path
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: include
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: x-access-token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudRide'
+    patch:
+      tags:
+        - Rides
+      description: Update ride by ID
+      operationId: UpdateRide
+      parameters:
+        - name: ride_id
+          in: path
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: x-access-token
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchRideRequest'
+        required: true
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudRide'
+  /api/v1/users/whoami:
+    get:
+      tags:
+        - User
+      description: Get User
+      operationId: GetUser
+      parameters:
+        - name: x-access-token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SHUser'
+  /api/v1/users/sendConfirm:
+    post:
+      tags:
+        - User
+      description: Send Confirm
+      operationId: SendConfirm
+      parameters:
+        - name: x-access-token
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEmailRequest'
+        required: true
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                type: string
+  /api/v1/users/update:
+    post:
+      tags:
+        - User
+      description: Update User
+      operationId: UpdateUser
+      parameters:
+        - name: x-access-token
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+        required: true
+      responses:
+        '200':
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                type: string
+components:
+  schemas:
+    SHUser:
+      type: object
+      properties:
+        authLevel:
+          type: string
+        created_at:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        deviceId:
+          type: string
+        deviceVersion:
+          type: string
+        devicePass:
+          type: string
+        distanceMetric:
+          type: boolean
+        email:
+          type: string
+        firstName:
+          type: string
+        gender:
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+          format: int32
+        height:
+          type: number
+          format: double
+        heightMetric:
+          type: boolean
+        id:
+          type: integer
+          format: int32
+        isConfirmed:
+          type: boolean
+        key:
+          type: string
+        language:
+          type: string
+        lastName:
+          type: string
+        password:
+          type: string
+        picture:
+          type: string
+        weight:
+          type: number
+          format: double
+        weightMetric:
+          type: boolean
+      required:
+        - email
+        - firstName
+        - key
+        - lastName
+    UserResponse:
+      type: object
+      properties:
+        access_jwt:
+          type: string
+        refresh_jwt:
+          type: string
+        user:
+          $ref: '#/components/schemas/SHUser'
+      required:
+        - access_jwt
+        - refresh_jwt
+        - user
+    SignupRequest:
+      type: object
+      properties:
+        dateOfBirth:
+          type: string
+          format: date
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        password:
+          type: string
+      required:
+        - dateOfBirth
+        - email
+        - firstName
+        - lastName
+        - password
+    FitnessIntegrations:
+      type: object
+      properties:
+        strava_id:
+          type: string
+      required:
+        - strava_id
+    PastRide:
+      type: object
+      properties:
+        averageSpeed:
+          type: number
+          format: float
+        calories:
+          type: number
+          format: float
+        co2:
+          type: number
+          format: float
+        createdAt:
+          type: string
+        distance:
+          type: number
+          format: float
+        duration:
+          type: integer
+          format: int32
+        elevation:
+          type: number
+          format: float
+        end:
+          type: string
+        integration:
+          $ref: '#/components/schemas/FitnessIntegrations'
+        hasDeleteRequest:
+          type: boolean
+        hasStravaUploadRequest:
+          type: boolean
+        hasUpdateRequest:
+          type: boolean
+        id:
+          type: integer
+          format: int32
+        stamp:
+          type: string
+        start:
+          type: string
+        updatedAt:
+          type: string
+        user_id:
+          type: integer
+          format: int32
+      required:
+        - createdAt
+        - end
+        - stamp
+        - start
+        - updatedAt
+    SHLocation:
+      type: object
+      properties:
+        key:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        accuracy:
+          type: number
+          format: float
+        address:
+          type: string
+        altitude:
+          type: number
+          format: double
+        description:
+          type: string
+        heading:
+          type: number
+          format: float
+        speed:
+          type: number
+          format: float
+        timestamp:
+          type: number
+          format: float
+        title:
+          type: string
+        type:
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - 6
+            - 7
+          format: int32
+      required:
+        - key
+        - latitude
+        - longitude
+    RideUploadLocation:
+      type: object
+      properties:
+        coords:
+          $ref: '#/components/schemas/SHLocation'
+        timestamp:
+          type: number
+          format: float
+      required:
+        - coords
+        - timestamp
+    RideUploadPayload:
+      type: object
+      properties:
+        averageSpeed:
+          type: number
+          format: double
+        calories:
+          type: integer
+          format: int32
+        co2:
+          type: number
+          format: double
+        distance:
+          type: integer
+          format: int32
+        duration:
+          type: number
+          format: float
+        elevation:
+          type: number
+          format: double
+        end:
+          type: string
+        integration:
+          $ref: '#/components/schemas/FitnessIntegrations'
+        markers:
+          $ref: '#/components/schemas/RideUploadLocation'
+        maxSpeed:
+          type: number
+          format: double
+        stamp:
+          type: number
+          format: float
+        start:
+          type: string
+      required:
+        - averageSpeed
+        - calories
+        - co2
+        - distance
+        - duration
+        - elevation
+        - end
+        - integration
+        - markers
+        - maxSpeed
+        - stamp
+        - start
+    RideMarker:
+      type: object
+      properties:
+        id:
+          type: number
+          format: float
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        accuracy:
+          type: number
+          format: float
+        activityConfidence:
+          type: string
+        activityType:
+          type: string
+        altitude:
+          type: number
+          format: float
+        heading:
+          type: number
+          format: double
+        ride_id:
+          type: integer
+          format: int32
+        speed:
+          type: number
+          format: float
+        timestamp:
+          type: number
+          format: float
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - latitude
+        - longitude
+        - accuracy
+        - activityConfidence
+        - activityType
+        - altitude
+        - heading
+        - ride_id
+        - speed
+        - timestamp
+        - updated_at
+        - created_at
+    CloudMarker:
+      type: object
+      properties:
+        accuracy:
+          type: number
+          format: float
+        altitude:
+          type: number
+          format: double
+        heading:
+          type: number
+          format: float
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        speed:
+          type: number
+          format: float
+        timestamp:
+          type: number
+          format: float
+      required:
+        - accuracy
+        - altitude
+        - heading
+        - latitude
+        - longitude
+        - speed
+        - timestamp
+    CloudSignificantMarker:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+      required:
+        - latitude
+        - longitude
+    CloudRide:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            average_speed:
+              type: number
+              format: float
+            calories:
+              type: number
+              format: float
+            co2:
+              type: number
+              format: float
+            created_at:
+              type: string
+            distance:
+              type: number
+              format: float
+            duration:
+              type: integer
+              format: int32
+            elevation:
+              type: number
+              format: float
+            end:
+              type: string
+            integration:
+              $ref: '#/components/schemas/FitnessIntegrations'
+            id:
+              type: integer
+              format: int32
+            markers:
+              type: array
+              items:
+                $ref: '#/components/schemas/CloudMarker'
+            significant_markers:
+              type: array
+              items:
+                $ref: '#/components/schemas/CloudSignificantMarker'
+            stamp:
+              type: string
+            start:
+              type: string
+            type:
+              type: string
+            updated_at:
+              type: string
+          required:
+            - average_speed
+            - calories
+            - co2
+            - created_at
+            - distance
+            - duration
+            - elevation
+            - end
+            - integration
+            - id
+            - markers
+            - significant_markers
+            - stamp
+            - start
+            - type
+            - updated_at
+      required:
+        - data
+    PatchRideRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            average_speed:
+              type: number
+              format: double
+            calories:
+              type: number
+              format: float
+            co2:
+              type: number
+              format: double
+            distance:
+              type: number
+              format: float
+            duration:
+              type: number
+              format: float
+            elevation:
+              type: number
+              format: double
+            end:
+              type: string
+            integration:
+              $ref: '#/components/schemas/FitnessIntegrations'
+            start:
+              type: string
+          required:
+            - average_speed
+            - calories
+            - co2
+            - distance
+            - duration
+            - elevation
+            - end
+            - integration
+            - start
+      required:
+        - data
+    UserEmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+      required:
+        - email
+    UserUpdateRequest:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/SHUser'
+      required:
+        - user
+  securitySchemes:
+    SecurityHeader:
+      type: apiKey
+      in: header
+      name: x-consumer-token
+security:
+  - SecurityHeader: []

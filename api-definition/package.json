@@ -1,0 +1,13 @@
+{
+    "dependencies": {
+        "@airtasker/spot": "^1.9.0"
+    },
+    "devDependencies": {
+        "@stoplight/prism-cli": "4.6.1",
+        "@openapitools/openapi-generator-cli": "2.4.23"
+    },
+    "scripts": {
+        "mock-server": "prism mock api.yml",
+        "generate-docs": "spot generate -c api.ts -l yaml -g openapi3 -o . && openapi-generator generate -i api.yml -g markdown -o ../api-docs --skip-validate-spec && cp api.yml ../api-docs/api.yml"
+    }
+}
