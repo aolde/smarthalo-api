@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: shdb
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - mongo-db:/data/db
+      - mongo-configdb:/data/configdb
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - mongo-compose-network
+    command: mongod --port 27017 --auth
+
+  mongo-express:
+    image: mongo-express:latest
+    depends_on:
+      - mongo
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: root
+      ME_CONFIG_MONGODB_URL: "mongodb://admin:root@mongo:27017/"
+    networks:
+      - mongo-compose-network
+
+  app:
+    build:
+      context: .
+      dockerfile: app.Dockerfile
+    depends_on:
+      - mongo
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGO_URL=mongodb://shadmin:shpassword@mongo:27017/shdb
+    volumes:
+      - ./src:/app/src
+    command: >
+      sh -c "cd /app && yarn start"
+    networks:
+      - mongo-compose-network
+
+volumes:
+  mongo-db:
+  mongo-configdb:
+
+networks:
+  mongo-compose-network:
+    driver: bridge
